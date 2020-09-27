@@ -21,9 +21,9 @@ link_directories(${OpenCV_LIBRARY_DIRS})
 add_definitions(${OpenCV_DEFINITIONS})
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-find_package(Eigen REQUIRED)
-link_directories(${Eigen_LIBRARY_DIRS})
-add_definitions(${Eigen_DEFINITIONS})
+find_package(Eigen3 REQUIRED)
+link_directories(${Eigen3_LIBRARY_DIRS})
+add_definitions(${Eigen3_DEFINITIONS})
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -128,7 +128,7 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${Franka_INCLUDE_DIRS}
-  ${Eigen_INCLUDE_DIRS}
+  ${Eigen3_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -137,8 +137,8 @@ add_library(joint_pos_motion
   src/joint_pose_motion_generator.cpp
  )
 
-target_link_libraries(joint_pos_motion ${catkin_LIBRARIES} ${Franka_LIBRARIES} ${Eigen_LIBRARIES})
-add_dependencies(joint_pos_motion ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} ${Franka_EXPORTED_TARGETS} ${Eigen_EXPORTED_TARGETS})
+target_link_libraries(joint_pos_motion ${catkin_LIBRARIES} ${Franka_LIBRARIES} ${Eigen3_LIBRARIES})
+add_dependencies(joint_pos_motion ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} ${Franka_EXPORTED_TARGETS} ${Eigen3_EXPORTED_TARGETS})
 
 add_executable(franka_plugin src/franka_plugin.cpp)
 target_link_libraries(franka_plugin joint_pos_motion ${catkin_LIBRARIES} ${Franka_LIBRARIES} ${OpenCV_LIBRARIES})
