@@ -1,10 +1,10 @@
-// Pity attempt to conver "web_interface_python.py" into C++ version. 
+// My pity attempt to convert "web_interface_python.py" into C++ version. 
 // Did not succeed. Maybe you can take on from here and do it?
-// How to do it:
-// Option 1: Write a C++ implementation "web_interface_python.py". 
-//           What stopped me is now knowing how to do "encode_password" function in C++...
+// How it could be done:
+// Option 1: Write a C++ implementation of "web_interface_python.py". 
+//           What stopped me is not knowing how to do "encode_password" function in C++...
 // Option 2: (THIS FILE) Call python functions through C++ using "Python.h" library.
-             // Update HOSTNAME/LOGIN/PASSWORD if needed and try to run the code, see where it stops.
+//           Update HOSTNAME/LOGIN/PASSWORD if needed and try to run the code, see where it stops.
 // Good luck!
 // Author: Jevgenijs Galaktionovs, jgalak16@student.aau.dk (until 2021 June); jga@reallyarobot.com 
 
