@@ -9,8 +9,15 @@
 5. Move Cartesian x,y,z RELATIVE dislocation
 5.1 Optional rx, ry, rz
 ~~6. Move Joint Angles~~ 
-7. Lock/Unlock outside of browser app
-8. Switch auto/manual mode outside of browser app
+7. Lock/Unlock brakes NOT in webinterface:
+
+*'libfranka' contributor's comment on this*:
+> Unfortunately, we have no plans to support opening and closing brakes from libfranka. This has to be done through the web interface.
+
+*HOWEVER! It seems like you can do this by setting HTTP connection and sending a request to the webinterface.
+There is a python code for it, need to implement C++ way of doing it.*
+
+1.  Switch auto/manual mode outside of browser app
 
 
 ##Currently implemented:
