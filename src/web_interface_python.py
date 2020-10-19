@@ -1,6 +1,7 @@
+#!/usr/bin/python3
 """
 In this script, there is a list of EXAMPLE functions starting with prefix "franka_".
-Each functions connects to Desk Web Interface and executes some action. 
+Each functions connects to Desk Web Interface and executes some action.
 
 IMPOPRTANT: Make sure that "IP_ADDRESS", "LOGIN", and "PASSWORD" are correct.
 
@@ -10,13 +11,14 @@ By using these you can:
 3. Re-home gripper
 4. Execute "Task" (those you create inside web interface, super easy to do, requires no programming)
 5. Change Pilot Mode (don't know what it does, but it exists in Web Interface so hey, why not to have it here)
-6. Change Guiding Mode (if you are in interactive mode (White light on robot), and move robot by hand, this mode will define how robot moves. Only translation, only rotation, both trans+rot, or "user defined way")
+6. Change Guiding Mode (if you are in interactive mode (White light on robot), and move robot by hand.
+        This mode will define how robot moves. Only translation, only rotation, both trans+rot, or "user defined way")
 7. Reboot robot (takes ~100 seconds)
 8. Shutdown robot.
 
 Author: Jevgenijs Galaktionovs; jgalak16@student.aau.dk (active until June 2021); jga@reallyarobot.com (active always <3)
 """
-#!/usr/bin/python3
+
 import json
 import hashlib
 import base64
