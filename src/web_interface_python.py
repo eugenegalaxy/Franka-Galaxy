@@ -1,4 +1,3 @@
-
 #!/usr/bin/python3
 import json
 import hashlib
@@ -6,11 +5,6 @@ import base64
 import ssl
 from time import strftime, sleep
 from http.client import HTTPSConnection, HTTPException
-
-
-def encode_password(user, password):
-    bs = ','.join([str(b) for b in hashlib.sha256((password + '#' + user + '@franka').encode('utf-8')).digest()])
-    return base64.encodebytes(bs.encode('utf-8')).decode('utf-8')
 
 
 def log(message):
@@ -35,9 +29,10 @@ class FrankaWebInterface:
     def __enter__(self):
         self._client = HTTPSConnection(self._hostname, context=ssl._create_unverified_context())
         self._client.connect()
-        encoded_password = encode_password(self._user, self._password)
+        encoded_password = self._encode_password(self._user, self._password)
+        body_data = json.dumps({'login': self._user, 'password': encoded_password})
         self._client.request('POST', '/admin/api/login',
-                             body=json.dumps({'login': self._user, 'password': encoded_password}),
+                             body=body_data,
                              headers={'content-type': 'application/json'})
         self._token = self._client.getresponse().read().decode('utf8')
         return self
@@ -54,6 +49,14 @@ class FrankaWebInterface:
                                       'Cookie': 'authorization=%s' % self._token})
         return self._client.getresponse()
 
+    def reboot(self):
+        self._client.request('POST', '/admin/api/reboot')
+        return self._client.getresponse()
+
+    def shutdown(self):
+        self._client.request('POST', '/admin/api/shutdown')  # NOTE CHECK THIS
+        return self._client.getresponse()
+
     def gripper_homing(self):
         # NOTE: Not tested with other end-effectors other than "Franka Hand".
         self._client.request('POST', '/desk/api/gripper/homing',
@@ -61,8 +64,44 @@ class FrankaWebInterface:
                                       'Cookie': 'authorization=%s' % self._token})
         return self._client.getresponse()
 
+    def execute_task(self, task_name):
+        body_data = 'id=0_' + task_name
+        self._client.request('POST', '/desk/api/execution',
+                             body=body_data,
+                             headers={'content-type': 'application/x-www-form-urlencoded',
+                                      'Cookie': 'authorization=%s' % self._token})
+        return self._client.getresponse()
+
+    def pilot_mode(self, mode='one'):
+        '''
+           Can be 'one' or 'robot'.
+        '''
+        quot_marks = '"' + mode + '"'  # NOTE string must be inside double quotation marks when passed
+        body_data = 'mode=' + quot_marks
+        self._client.request('PUT', '/desk/api/navigation/mode',
+                             body=body_data,
+                             headers={'content-type': 'application/x-www-form-urlencoded',
+                                      'Cookie': 'authorization=%s' % self._token})
+        return self._client.getresponse()
+
+    def guiding_mode(self, mode='translation'):
+        '''
+           Can be 'translation', 'rotation', 'free', or 'user'.
+        '''
+        quot_marks = '"' + mode + '"'  # NOTE string must be inside double quotation marks when passed
+        body_data = 'mode=' + quot_marks
+        self._client.request('PUT', '/desk/api/robot/guiding/mode',
+                             body=body_data,
+                             headers={'content-type': 'application/x-www-form-urlencoded',
+                                      'Cookie': 'authorization=%s' % self._token})
+        return self._client.getresponse()
+
     def __exit__(self, type, value, traceback):
         self._client.close()
+
+    def _encode_password(self, user, password):
+        bs = ','.join([str(b) for b in hashlib.sha256((password + '#' + user + '@franka').encode('utf-8')).digest()])
+        return base64.encodebytes(bs.encode('utf-8')).decode('utf-8')
 
 
 def franka_open_brakes(hostname, login, password):
@@ -103,10 +142,88 @@ def franka_gripper_homing(hostname, login, password):
             log('ERROR Homing Gripper')
 
 
+def franka_execute_task(hostname, login, password, TASK_NAME):
+    with FrankaWebInterface(hostname, login, password) as api:
+        try:
+            response = api.execute_task(TASK_NAME)
+            if response.status == 200:
+                log(" Task '{}' is executed successfully.".format(TASK_NAME))
+            else:
+                log("ERROR Executing Task '{0}'. Response status: {1}".format(TASK_NAME, response.status))
+        except HTTPException:
+            log("ERROR Executing Task '{0}'.".format(TASK_NAME))
+
+
+def franka_pilot_mode(hostname, login, password, MODE):
+    with FrankaWebInterface(hostname, login, password) as api:
+        try:
+            response = api.pilot_mode(mode=MODE)
+            if response.status == 200:
+                log(" Pilot Mode '{}' is set successfully.".format(MODE))
+            else:
+                log("ERROR Setting Pilot Mode '{0}'. Response status: {1}".format(MODE, response.status))
+        except HTTPException:
+            log("ERROR Setting Pilot Mode '{0}'.".format(MODE))
+
+
+def franka_guiding_mode(hostname, login, password, MODE):
+    with FrankaWebInterface(hostname, login, password) as api:
+        try:
+            response = api.guiding_mode(mode=MODE)
+            if response.status == 200:
+                log("Guiding Mode '{}' is set successfully.".format(MODE))
+            else:
+                log("ERROR Setting Guiding Mode '{0}'. Response status: {1}".format(MODE, response.status))
+        except HTTPException:
+            log("ERROR Setting Guiding Mode '{}'".format(MODE))
+
+
+def franka_reboot(hostname, login, password):
+    with FrankaWebInterface(hostname, login, password) as api:
+        try:
+            response = api.reboot()
+            if response.status == 200:
+                log('Franka reboot initialized. Will take ~100 seconds.')
+            else:
+                log('ERROR Franka reboot. Response status: {}'.format(response.status))
+        except HTTPException:
+            log('ERROR Franka reboot')
+
+
+def franka_shutdown(hostname, login, password):
+    with FrankaWebInterface(hostname, login, password) as api:
+        try:
+            response = api.shutdown()
+            if response.status == 200:
+                log('Franka shutdown initialized.')
+            else:
+                log('ERROR Franka shutdown. Response status: {}'.format(response.status))
+        except HTTPException:
+            log('ERROR Franka shutdown')
+
+
 # Example function calls
 HOSTNAME = '172.27.23.65'
 LOGIN = 'Panda'
 PASSWORD = 'panda1234'
+
 franka_open_brakes(HOSTNAME, LOGIN, PASSWORD)
-franka_gripper_homing(HOSTNAME, LOGIN, PASSWORD)
-franka_close_brakes(HOSTNAME, LOGIN, PASSWORD)
+# franka_gripper_homing(HOSTNAME, LOGIN, PASSWORD)
+# franka_close_brakes(HOSTNAME, LOGIN, PASSWORD)
+
+task_name = 'test1'
+# franka_execute_task(HOSTNAME, LOGIN, PASSWORD, task_name)
+
+pilot_mode1 = 'robot'  # NOTE must be double quotation string inside a single quote string.
+pilot_mode2 = 'one'
+# franka_pilot_mode(HOSTNAME, LOGIN, PASSWORD, pilot_mode1)
+
+
+guiding_mode1 = 'translation'
+guiding_mode2 = 'rotation'
+guiding_mode3 = 'free'
+guiding_mode4 = 'user'
+# franka_guiding_mode(HOSTNAME, LOGIN, PASSWORD, guiding_mode1)
+
+# franka_reboot(HOSTNAME, LOGIN, PASSWORD)
+# franka_shutdown(HOSTNAME, LOGIN, PASSWORD)
