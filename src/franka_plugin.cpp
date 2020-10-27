@@ -1,6 +1,7 @@
 #include <cmath>
 #include <iostream>
 #include <limits> // for quiet_NaN
+#include <string>
 
 #include <opencv2/opencv.hpp>
 #include <franka/exception.h>
@@ -180,7 +181,6 @@ cv::Mat rot2euler(const cv::Mat & rotationMatrix){
 /**
  * Returns robot end-effector pose in base frame.
  * x,y,z are in meters; rx,ry,rz are in radians (Euler angles). 
- *
  */
 std::array<double, 6> readEEpose(){
   franka::Robot robot(ROBOT_IP_STR);
@@ -207,15 +207,58 @@ std::array<double, 6> readEEpose(){
   return EE_pose;
 }
 
+
+/**
+  *  kOther (0), kIdle (1), kMove (2), kGuiding (3),
+  *  kReflex (4), kUserStopped (5), kAutomaticErrorRecovery (6)
+  */
+std::string read_robot_mode(){
+  franka::Robot robot(ROBOT_IP_STR);
+  franka::RobotMode robot_mode = robot.readOnce().robot_mode;
+  std::string mode_string;
+  switch(robot_mode){
+    case franka::RobotMode::kOther:
+      mode_string = "Other";
+      break;
+    case franka::RobotMode::kIdle:
+      mode_string = "Idle";
+      break;
+    case franka::RobotMode::kMove:
+      mode_string = "Move";
+      break;
+    case franka::RobotMode::kGuiding:
+      mode_string = "Guiding";
+      break;
+    case franka::RobotMode::kReflex:
+      mode_string = "Reflex";
+      break;
+    case franka::RobotMode::kUserStopped:
+      mode_string = "UserStopped";
+      break;
+    case franka::RobotMode::kAutomaticErrorRecovery:
+      mode_string = "AutomaticErrorRecovery";
+      break;
+    default:
+      mode_string = "ERROR";
+      DEBUG("Robot Mode is unknown. Here is a full robot state:");
+      auto full_state = robot.readOnce();
+      DEBUG(full_state);
+  }
+  DEBUG(mode_string);
+  return mode_string;
+}
+
 int main(int argc, char** argv)
 {
   try
   {
-    setDefaultBehavior();
-    moveHomePos();
-    auto pose1 = readEEpose();
-    moveTransportablePos();
-    auto pose2 = readEEpose();
+    // setDefaultBehavior();
+    // moveHomePos();
+    // auto pose1 = readRobotState();
+    // moveTransportablePos();
+    // auto pose2 = readRobotState();
+    std::string status = read_robot_mode();
+    
 
   } catch (const franka::Exception& e)
     {

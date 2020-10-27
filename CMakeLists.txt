@@ -5,7 +5,9 @@ add_compile_options(-std=c++11)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  rospy
   std_msgs
+  message_generation
 )
 
 find_package(PythonLibs REQUIRED)
@@ -25,6 +27,16 @@ link_directories(${Eigen3_LIBRARY_DIRS})
 add_definitions(${Eigen3_DEFINITIONS})
 
 
+add_service_files(
+  FILES
+  bool_key.srv
+)
+
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+)
+
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
@@ -42,7 +54,7 @@ add_definitions(${Eigen3_DEFINITIONS})
 catkin_package(
 	INCLUDE_DIRS include
 #  LIBRARIES franka_plugin
-#  CATKIN_DEPENDS other_catkin_pkg
+  CATKIN_DEPENDS message_runtime
 #  DEPENDS system_lib
 )
 
@@ -68,9 +80,15 @@ add_library(joint_pos_motion
   src/joint_pose_motion_generator.cpp
 )
 
-
 target_link_libraries(joint_pos_motion ${catkin_LIBRARIES} ${Franka_LIBRARIES} ${Eigen3_LIBRARIES})
 add_dependencies(joint_pos_motion ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS} ${Franka_EXPORTED_TARGETS} ${Eigen3_EXPORTED_TARGETS})
+
+add_executable(franka_plugin src/franka_plugin.cpp)
+target_link_libraries(franka_plugin joint_pos_motion ${catkin_LIBRARIES} ${Franka_LIBRARIES} ${OpenCV_LIBRARIES})
+
+add_executable(franka_node src/franka_node.cpp)
+target_link_libraries(franka_node ${catkin_LIBRARIES} ${Franka_LIBRARIES})
+
 
 #add_executable(franka_webAPI src/garbage/franka_webAPI.cpp)
 #target_link_libraries(franka_webAPI ${catkin_LIBRARIES} ${PYTHON_LIBRARIES})
