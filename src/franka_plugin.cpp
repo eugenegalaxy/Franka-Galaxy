@@ -209,8 +209,9 @@ std::array<double, 6> readEEpose(){
 
 
 /**
-  *  kOther (0), kIdle (1), kMove (2), kGuiding (3),
-  *  kReflex (4), kUserStopped (5), kAutomaticErrorRecovery (6)
+  * Returns Franka robot status: 
+  *  Other (0), Idle (1), Move (2), Guiding (3),
+  *  Reflex (4), UserStopped (5), AutomaticErrorRecovery (6)
   */
 std::string read_robot_mode(){
   franka::Robot robot(ROBOT_IP_STR);

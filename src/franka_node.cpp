@@ -1,3 +1,12 @@
+/*"""
+ * ROS node that has only 1 service: to return Franka robot status: Idle, Move, UserStopped etc...
+ * This script is a trivial Python2 implementation of a ROS node.
+ * Made as an assignment for the Franka demonstration to deans, November 2020.
+ *
+ * IMPOPRTANT: Must provide correct IP address to Franka robot on line 14 (ROBOT_IP_STR).
+ *
+ * Author: Jevgenijs Galaktionovs; jgalak16@student.aau.dk (active until June 2021); jga@reallyarobot.com (active always <3)
+ */
 #include "ros/ros.h"
 #include <franka/robot.h>
 #include "franka_plugin/bool_key.h"
