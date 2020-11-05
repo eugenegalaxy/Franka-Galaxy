@@ -28,7 +28,7 @@ bool DEBUGGING_ENABLED = true;
  * Sets a default collision behavior, joint impedance, Cartesian impedance, and filter frequency.
  * @note Selected values are chosen by guessing, feel free to modify them if needed.
  */
-void setDefaultBehavior() {
+void set_default_behavior() {
   franka::Robot robot(ROBOT_IP_STR);
   robot.automaticErrorRecovery();
 
@@ -66,7 +66,7 @@ void setDefaultBehavior() {
  * @param[in] speed_factor General speed factor in range [0, 1]. Default value is set at 0.5
  *
  */
-void moveJointPos(std::array<double, 7> q_goal, double speed_factor=0.5){
+void move_pos_joint(std::array<double, 7> q_goal, double speed_factor=0.5){
   franka::Robot robot(ROBOT_IP_STR);
   robot.automaticErrorRecovery();
   MotionGenerator joint_positions_motion_generator(speed_factor, q_goal);
@@ -88,7 +88,7 @@ void moveJointPos(std::array<double, 7> q_goal, double speed_factor=0.5){
  * @param[in] speed_factor General speed factor in range [0, 1]. Default value is set at 0.5
  *
  */
-void moveHomePos(double speed_factor=0.5){
+void move_pos_home(double speed_factor=0.5){
   franka::Robot robot(ROBOT_IP_STR);
   robot.automaticErrorRecovery();
   //std::array<double, 7> q_goal = {{0, -M_PI_4, 0, -3 * M_PI_4, 0, M_PI_2, M_PI_4}};
@@ -115,7 +115,7 @@ void moveHomePos(double speed_factor=0.5){
  * @param[in] speed_factor General speed factor in range [0, 1]. Default value is set at 0.5
  *
  */
-void moveTransportablePos(double speed_factor=0.5){
+void move_pos_transportable(double speed_factor=0.5){
   franka::Robot robot(ROBOT_IP_STR);
   robot.automaticErrorRecovery();
   std::array<double, 7> q_goal = {{-0.02104, 0.1628, -0.4269, -3.0051, 1.0922, 1.5307, -0.7904 }};
@@ -131,7 +131,7 @@ void moveTransportablePos(double speed_factor=0.5){
  * @example robot_state.q -> Measured joint position.
  * @example robot_state.O_T_EE_d -> Last desired end effector pose of motion generation in base frame. 
  */
-franka::RobotState readRobotState(){
+franka::RobotState read_robot_state(){
   franka::Robot robot(ROBOT_IP_STR);
   auto robot_state = robot.readOnce();
   DEBUG(robot_state);
@@ -143,7 +143,7 @@ franka::RobotState readRobotState(){
  * 
  * @param[in] rotationMatrix 3x3 rotation matrix in cv::Mat type.
  */
-cv::Mat rot2euler(const cv::Mat & rotationMatrix){
+cv::Mat rot_to_euler(const cv::Mat & rotationMatrix){
   cv::Mat euler(3,1,CV_64F);
 
   double m00 = rotationMatrix.at<double>(0,0);
@@ -182,7 +182,7 @@ cv::Mat rot2euler(const cv::Mat & rotationMatrix){
  * Returns robot end-effector pose in base frame.
  * x,y,z are in meters; rx,ry,rz are in radians (Euler angles). 
  */
-std::array<double, 6> readEEpose(){
+std::array<double, 6> read_ee_pose(){
   franka::Robot robot(ROBOT_IP_STR);
   auto robot_state = robot.readOnce().O_T_EE_d;
 
@@ -197,7 +197,7 @@ std::array<double, 6> readEEpose(){
           rotationMatrix.at<double>(i,j)= rotation_vector[i+j];
 
   cv::Mat eulers(3, 1, CV_64F);
-  eulers = rot2euler(rotationMatrix);
+  eulers = rot_to_euler(rotationMatrix);
 
   std::array<double, 6> EE_pose;  // x,y,z, rx, ry, rz in meters
   EE_pose = {robot_state[12], robot_state[13], robot_state[14],
@@ -206,7 +206,6 @@ std::array<double, 6> readEEpose(){
   DEBUG2("End-effector pose:", EE_pose, 6);
   return EE_pose;
 }
-
 
 /**
   * Returns Franka robot status: 
@@ -249,15 +248,18 @@ std::string read_robot_mode(){
   return mode_string;
 }
 
+
+
+
 int main(int argc, char** argv)
 {
   try
   {
-    // setDefaultBehavior();
-    // moveHomePos();
-    // auto pose1 = readRobotState();
-    // moveTransportablePos();
-    // auto pose2 = readRobotState();
+    // set_default_behavior();
+    // move_pos_home();
+    // auto pose1 = read_robot_state();
+    // move_pos_transportable();
+    // auto pose2 = read_robot_state();
     std::string status = read_robot_mode();
     
 
