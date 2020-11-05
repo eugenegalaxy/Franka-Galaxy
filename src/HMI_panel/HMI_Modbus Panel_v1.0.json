@@ -3,7 +3,7 @@
 "modules" :
 	[{
 		"comment": "Module 1",
-		"ip": "192.168.0.33",
+		"ip": "172.27.23.66",
 		"port": "502",
 		"comment": "Inputs to robot from PLC",
 		"inputs": 
