@@ -6,6 +6,7 @@
 #include <opencv2/opencv.hpp>
 #include <franka/exception.h>
 #include <franka/robot.h>
+#include <franka/gripper.h>
 
 #include <franka_plugin/joint_pose_motion_generator.h>
 
@@ -62,8 +63,8 @@ void set_default_behavior() {
 /**
  * Moves each robot joint to a goal position using Joint Pose controller.
  *
- * @param[in] q_goal Target joint positions in radians
- * @param[in] speed_factor General speed factor in range [0, 1]. Default value is set at 0.5
+ * @param[in] q_goal Target joint positions in radians.
+ * @param[in] speed_factor General speed factor in range [0, 1]. Default value is set at 0.5.
  *
  */
 void move_pos_joint(std::array<double, 7> q_goal, double speed_factor=0.5){
@@ -75,7 +76,7 @@ void move_pos_joint(std::array<double, 7> q_goal, double speed_factor=0.5){
 }
 
 /**
- * Moves the robot to "HOME" (also "PRE-GRASP") configuration  
+ * Moves the robot to "HOME" (also "PRE-GRASP") configuration.
  * @note  o---          Symbols:
  * @note  |   o             =  : workspace table
  * @note  o    \-o.         o  : robot joint
@@ -85,7 +86,7 @@ void move_pos_joint(std::array<double, 7> q_goal, double speed_factor=0.5){
  * @note    o  
  * @note ==============
  * 
- * @param[in] speed_factor General speed factor in range [0, 1]. Default value is set at 0.5
+ * @param[in] speed_factor General speed factor in range [0, 1]. Default value is set at 0.5.
  *
  */
 void move_pos_home(double speed_factor=0.5){
@@ -99,7 +100,7 @@ void move_pos_home(double speed_factor=0.5){
 }
 
 /**
- * Moves the robot to "TRANSPORTABLE" configuration  
+ * Moves the robot to "TRANSPORTABLE" configuration.
  * @note     -o-       Symbols:
  * @note    |   |          =  : workspace table
  * @note    o   o          o  : robot joint
@@ -110,10 +111,9 @@ void move_pos_home(double speed_factor=0.5){
  * @note ===========
  * 
  * @warning This is not the pose used when packing/unpacking robot from original boxing, but
- * @warning just an arbitrary compact form
+ * @warning just an arbitrary compact form.
  * 
- * @param[in] speed_factor General speed factor in range [0, 1]. Default value is set at 0.5
- *
+ * @param[in] speed_factor General speed factor in range [0, 1]. Default value is set at 0.5.
  */
 void move_pos_transportable(double speed_factor=0.5){
   franka::Robot robot(ROBOT_IP_STR);
@@ -125,11 +125,13 @@ void move_pos_transportable(double speed_factor=0.5){
 }
 
 /**
- * Returns full robot state information. 
+ * Reads full robot state information. 
  * @note Specific states can be extracted using attributes,
  * @note see https://frankaemika.github.io/libfranka/structfranka_1_1RobotState.html
  * @example robot_state.q -> Measured joint position.
  * @example robot_state.O_T_EE_d -> Last desired end effector pose of motion generation in base frame. 
+ * 
+ * @return Full robot state information. Note: this can be easily printed with 'std::cout << robot_state << std::endl;'
  */
 franka::RobotState read_robot_state(){
   franka::Robot robot(ROBOT_IP_STR);
@@ -139,11 +141,12 @@ franka::RobotState read_robot_state(){
 }
 
 /**
- * Converts 3x3 Rotation Matrix to Euler angles
+ * Converts 3x3 Rotation Matrix to Euler angles.
  * 
  * @param[in] rotationMatrix 3x3 rotation matrix in cv::Mat type.
+ * @return 3x1 matrix of Euler angles: rx, ry, rz.
  */
-cv::Mat rot_to_euler(const cv::Mat & rotationMatrix){
+cv::Mat _rot_to_euler(const cv::Mat & rotationMatrix){
   cv::Mat euler(3,1,CV_64F);
 
   double m00 = rotationMatrix.at<double>(0,0);
@@ -180,7 +183,7 @@ cv::Mat rot_to_euler(const cv::Mat & rotationMatrix){
 
 /**
  * Returns robot end-effector pose in base frame.
- * x,y,z are in meters; rx,ry,rz are in radians (Euler angles). 
+ * @return [x, y, z, rx, ry, rz]. x,y,z are in meters; rx,ry,rz in radians (Euler angles). 
  */
 std::array<double, 6> read_ee_pose(){
   franka::Robot robot(ROBOT_IP_STR);
@@ -197,7 +200,7 @@ std::array<double, 6> read_ee_pose(){
           rotationMatrix.at<double>(i,j)= rotation_vector[i+j];
 
   cv::Mat eulers(3, 1, CV_64F);
-  eulers = rot_to_euler(rotationMatrix);
+  eulers = _rot_to_euler(rotationMatrix);
 
   std::array<double, 6> EE_pose;  // x,y,z, rx, ry, rz in meters
   EE_pose = {robot_state[12], robot_state[13], robot_state[14],
@@ -208,9 +211,11 @@ std::array<double, 6> read_ee_pose(){
 }
 
 /**
-  * Returns Franka robot status: 
-  *  Other (0), Idle (1), Move (2), Guiding (3),
-  *  Reflex (4), UserStopped (5), AutomaticErrorRecovery (6)
+  * Read Franka robot status:
+  * Other (0), Idle (1), Move (2), Guiding (3),
+  * Reflex (4), UserStopped (5), AutomaticErrorRecovery (6)
+  * 
+  * @return string of Franka status.
   */
 std::string read_robot_mode(){
   franka::Robot robot(ROBOT_IP_STR);
@@ -248,19 +253,195 @@ std::string read_robot_mode(){
   return mode_string;
 }
 
+/**
+ * A simple controller commanding zero torque for each joint. Gravity is compensated by the robot.
+ */ 
+void zero_torque_mode(){
+  franka::Robot robot(ROBOT_IP_STR);
+  robot.automaticErrorRecovery();
+  robot.control([&](const franka::RobotState&, franka::Duration) -> franka::Torques {
+      return {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
+    });
+}
 
+/**
+ * Performs homing of the gripper. After changing the gripper fingers, a homing needs to be done.
+ * This is needed to estimate the maximum grasping width.
+ * 
+ * @return status - 'true' is executed successfully, 'false' if not.
+ */
+bool gripper_homing(){
+  franka::Gripper gripper(ROBOT_IP_STR);
+  bool status = gripper.homing(); // Gripper Calibration
+  if(status == true){
+    DEBUG("Gripper homed.");
+  }
+  else{
+    DEBUG("Failed to home gripper.");
+  }
+  return status;
+}
 
+/**
+ * Moves the gripper fingers to a specified width.
+ *
+ * @param[in] width Intended opening width. [m]
+ * @param[in] speed Closing speed. [m/s]
+ * 
+ * @return status - 'true' is executed successfully, 'false' if not.
+ */
+bool gripper_move(double width, double speed){
+  franka::Gripper gripper(ROBOT_IP_STR);
+  bool status = gripper.move(width, speed); // Gripper Calibration
+  if(status == true){
+    std::string debug_print = "Gripper moved to " + std::to_string(width) + "m with " + std::to_string(speed) + "m/s.";  
+    DEBUG(debug_print);
+  }
+  else{
+    DEBUG("Failed to move gripper.");
+  }
+  return status;
+}
+
+/**
+ * Grasps an object. An object is considered grasped if the distance 'd' between the gripper fingers satisfies 
+ * equation: (width - epsilon_inner) < d < (width - epsilon_outer).
+ *
+ * @param[in] width Intended opening width. [m]
+ * @param[in] speed Closing speed. [m/s]
+ * @param[in] force Grasping force. [N]
+ * @param[in] epsilon_inner Maximum tolerated deviation when the actual grasped width is SMALLER than the commanded grasp width.
+ * @param[in] epsilon_outer Maximum tolerated deviation when the actual grasped width is LARGER than the commanded grasp width.
+ * 
+ * @return status - 'true' is executed successfully, 'false' if not.
+ */
+bool gripper_grasp(double width, double speed, double force, double epsilon_inner = 0.005, double epsilon_outer = 0.005){
+  franka::Gripper gripper(ROBOT_IP_STR);
+  bool status = gripper.grasp(width, speed, force , epsilon_inner, epsilon_outer);
+  if(status == true){
+    std::string str1 = "Object grasped at " + std::to_string(width) + "m width" +  
+                              "with " + std::to_string(speed) + "m/s speed and " + std::to_string(force) + " N force.";
+    std::string str2 = "Inner epsilon (tolerance) is " + std::to_string(epsilon_inner) + 
+                       "m, outer epsilon is " + std::to_string(epsilon_outer) + "m.";                     
+    DEBUG(str1);
+    DEBUG(str2);
+  }
+  else{
+    DEBUG("Failed to move grasp the object.");
+  }
+  return status;
+}
+
+/**
+ * Stops a currently running gripper move or grasp.
+ * @return status - 'true' is executed successfully, 'false' if not.
+ */
+bool gripper_stop(){
+  franka::Gripper gripper(ROBOT_IP_STR);
+  bool status = gripper.stop();
+  if(status == true){
+    DEBUG("Gripper stopped");
+  }
+  else{
+    DEBUG("Failed to stop gripper.");
+  }
+  return status;
+}
+
+/**
+ * Reads gripper state information. 
+ * @note Specific states can be extracted using attributes,
+ * @example robot_state.max_width -> Maximum finger width.
+ * 
+ * @return Gripper state information. Note: this can be easily printed with 'std::cout << gripper_state << std::endl;'
+ */
+franka::GripperState read_gripper_state(){
+  franka::Gripper gripper(ROBOT_IP_STR);
+  franka::GripperState gripper_state = gripper.readOnce();
+  return gripper_state;
+}
+
+// Needs more work. don't use now.
+void move_cartesian_pose(double target_x, double target_y, double target_z){
+  franka::Robot robot(ROBOT_IP_STR);
+  std::array<double, 16> initial_pose;
+  double time = 0.0;
+
+  robot.control([&time, &initial_pose, &target_x, &target_y, &target_z](const franka::RobotState& robot_state,
+                                        franka::Duration period) -> franka::CartesianPose {
+    time += period.toSec();
+
+    if (time == 0.0) {
+      initial_pose = robot_state.O_T_EE_c;
+    }
+
+    std::array<double, 16> current_pose = initial_pose;
+    double cur_x = current_pose[12]; 
+    double cur_y = current_pose[13];
+    double cur_z = current_pose[14]; 
+
+    // computing the motion
+    double vec_x = target_x - cur_x;
+    double vec_y = target_y - cur_y;
+    double vec_z = target_z - cur_z; 
+
+    double l2_norm = sqrt(vec_x*vec_x + vec_y*vec_y + vec_z*vec_z);
+
+    double new_x = 0;
+    double new_y = 0;
+    double new_z = 0;
+
+    new_x = (vec_x / l2_norm);
+    new_y = (vec_y / l2_norm);
+    new_z = (vec_z / l2_norm); 
+
+    // initially, the robot moves to its current position (-> no motion)
+    if (std::isnan(target_x)) {
+      target_x = cur_x; 
+      target_y = cur_y; 
+      target_z = cur_z; 
+    }
+
+    // std::array<double, 16> new_pose = initial_pose;
+    // new_pose[12] += new_x;
+    // new_pose[13] += new_y;
+    // new_pose[14] += new_z;
+
+    constexpr double kRadius = 0.2;
+    double angle = M_PI / 4 * (1 - std::cos(M_PI / 5.0 * time));
+    double delta_x = kRadius * std::sin(angle);
+    double delta_z = kRadius * (std::cos(angle) - 1);
+
+    std::array<double, 16> new_pose = initial_pose;
+    new_pose[12] += delta_x;
+    new_pose[14] += delta_z;
+
+    if (time >= 3.0) {
+      std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
+      return franka::MotionFinished(new_pose);
+    }
+    return new_pose;
+  });
+
+}
 
 int main(int argc, char** argv)
 {
   try
   {
-    // set_default_behavior();
-    // move_pos_home();
+
+    // zero_torque_mode();
+    // gripper_homing();
+    // gripper_grasp(0.07, 0.10, 10, 0.02, 0.02);
+    // auto gr_state = read_gripper_state();
+    // std::cout << gr_state << std::endl;
+    set_default_behavior();
+    move_pos_home();
+    move_cartesian_pose(0, 0, 0); 
     // auto pose1 = read_robot_state();
     // move_pos_transportable();
     // auto pose2 = read_robot_state();
-    std::string status = read_robot_mode();
+    // std::string status = read_robot_mode();
     
 
   } catch (const franka::Exception& e)

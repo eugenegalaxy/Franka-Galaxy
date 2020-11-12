@@ -86,9 +86,8 @@ add_dependencies(joint_pos_motion ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_E
 add_executable(franka_plugin src/franka_plugin.cpp)
 target_link_libraries(franka_plugin joint_pos_motion ${catkin_LIBRARIES} ${Franka_LIBRARIES} ${OpenCV_LIBRARIES})
 
-add_executable(franka_node src/franka_node.cpp)
+add_executable(franka_node src/little_helper_demo/franka_node.cpp)
 target_link_libraries(franka_node ${catkin_LIBRARIES} ${Franka_LIBRARIES})
-
 
 #add_executable(franka_webAPI src/garbage/franka_webAPI.cpp)
 #target_link_libraries(franka_webAPI ${catkin_LIBRARIES} ${PYTHON_LIBRARIES})
