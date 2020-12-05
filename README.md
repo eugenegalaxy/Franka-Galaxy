@@ -33,7 +33,6 @@
       <a href="#getting-started">Getting Started</a>
       <ul>
         <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
@@ -47,35 +46,27 @@
 
 <!-- ABOUT THE PROJECT -->
 ## About The Project
-TBA
+
+Hey everyone, I am Eugene `Galaxy` Galaktionovs. This project is a collection of functions to control Franka Emika robots via code. The purpose of this repository is to collect common Franka functions under one source and use it as a driver submodule in other projects. The project consists of two main points:
+- C++ 'driver' containing common robot commands, such as move, set parameters, read states, etc.
+- Python Web API containing methods to send requests to Franka Desk web browser API. For example, you can open and lock brakes on Franka robot.
 
 <!-- GETTING STARTED -->
 ## Getting Started
 
-TBA
+This repository is made in ROS infrastructure, even though not much of ROS is used at the moment (but will be in the close future).
+To use this repo, one must clone it to *catkin_workspace/src/* directory, and *catkin_make* it. But *OPS!*, it won't compile because one is missing dependencies. Read below about them.
 
 ### Prerequisites
-
-TBA
-* example
-  ```sh
-  npm install npm@latest -g
-  ```
-
-### Installation
- 
-TBA 
-
-1. Clone the repo
-   ```sh
-   git clone https://github.com/eugenegalaxy/Franka-Galaxy.git
-   ```
-2. Install NPM packages
-   ```sh
-   npm install
-   ```
-
-
+- Linux with patched Kernel for Preemtiveness. See *doc/alternative_real-time_kernel_INSTALLATION_process* for instructions.
+- ROS Melodic (maybe earlier versions too, don't know)
+- cmake at least3.10
+- Following packages are all dependences of submodule 'frankx' and must be installed on your system:
+  1. Eigen v3.3.7
+  2. Libfranka v0.7.1
+  3. Pybind11 v2.6.0
+  4. Catch2 v2.9 (only for testing)
+See `doc/install_frankx.txt` for some instructions (NEEDS UPDATE)
 
 <!-- USAGE EXAMPLES -->
 ## Usage
