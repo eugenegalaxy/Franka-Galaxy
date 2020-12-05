@@ -1,0 +1,11 @@
+After you have connected Franka Control Interface to your workstation and after you have installed libfranks in ROS,
+
+you can run some examples by the following commands:
+
+rosrun libfranka (PRESS TAB HERE) to see all options.
+
+Syntax: rosrun libfranka <example_name> <robot ip>
+Example: rosrun libfranka generate_joint_velocity_motion 172.16.0.2
+
+NOTE: Robot must be in automatic program running mode (BLUE LIGHT on robot, achieved by the switch or holding button on a joystick).
+

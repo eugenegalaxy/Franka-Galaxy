@@ -1,0 +1,22 @@
+Using Franka Robot in real time requires that your Linux kernel is supporting "PREEMPTIVE" mode, meaning tasks can be prioritized and interrupted as needed.
+
+To do that, Franka documentation gives a tutorial here :https://frankaemika.github.io/docs/installation_linux.html 
+HOWEVER!!! This tutorial didnt work on ubuntu 18.04 when I tried (Eugene, 06.08.2020). 
+
+Instead, there is an alternative installation process, described here:
+https://github.com/frankaemika/libfranka/issues/62
+
+
+Important note:
+Installation is not automatically applied to the current Kernel. Instead, there is another Kernel that has to be chosen to boot in GRUB boot menu.
+Here is how to do it:
+
+
+1. To open GRUB menu, press ESC when system boots (seeing "Ubuntu" loading screen means you didnt make it in time. Restart, try again)
+	1.1 Or modify /etc/default/grub text file. Set values: 'GRUB_TIMEOUT_STYLE=menu' and 'GRUB_TIMEOUT=5' (or some other number in seconds)
+	If unclear, read instructions in this post:
+	https://askubuntu.com/questions/16042/how-to-get-to-the-grub-menu-at-boot-time
+
+2. In GRUB loader, go to "Advanced Ubuntu Options" and select your newly installed linux kernel (probably the one that contains "rt" at the end of the name.
+
+3. (Not needed) It is most likely possible to set this kernel to boot by default, havent done that yet.

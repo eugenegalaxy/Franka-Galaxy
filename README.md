@@ -17,7 +17,7 @@
   <h3 align="center">Galaxy Franka Driver</h3>
 
   <p align="center">
-    Your best chance at controlling Franka Robot.
+    Your best chance at controlling Franka Emika Panda beasts.
     <br />
   </p>
 </p>

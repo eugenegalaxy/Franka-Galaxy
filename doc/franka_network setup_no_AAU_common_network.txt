@@ -1,0 +1,35 @@
+How to connect your workstation PC (assuming no wifi) simultaneouly to both robot and network router.
+
+0. Connect ethernet cable from PC to Robot Arm base. Go to browser DESK app (robot.franka.de) and login.
+	There, go to settings -> Network -> Untick "DHCP" setting and write IP address manually
+	I chose the one from tutorial on FRANKA docs:  Address: 172.16.0.2 and Netmask: 255.255.255.0  (leave "Gateway" and "DNS" empty).
+	
+
+1. By following FRANKA documentation guide, in order to use franka offline with Franka Control Interface, 
+	the user must connect LAN (ethernet) port of workstation to CONTROL box (not robot arm base).
+	So replugging cable from Robot Arm Base to Control box. This action leaves us witihout internet connection (for now)
+	
+2. In Ubuntu, go to network connections -> Wired Settings -> click "cogwheel" icon next to "Wired-Connected - 100x Mb/S" text.
+	Navigate to "IPv4" tab, choose "Manual" instead of "Automatic(DHCP) method.
+	Write "Address" below as 172.16.0.1 and Netmask as 255.255.255.0 (leave rest untouched/empty).
+	
+Now Robot Control box and your PC are on the same network and can connect to each other.
+
+3. Test connection -> Open terminal and run this line (assuming you have installed "libfranka ROS package"):
+rosrun libfranka echo_robot_state 172.16.02
+
+If connection is established, it will print a loooot of numbers with robot states.
+If no connection -> prints 1 line with "error, no connection".
+
+4. NOW the problem is: our workstation has no internet connection (to my best knowledge, maybe there is something cheeky I havent done). How to fix?
+	Find some adapter (I used male USB to female ethernet converter) and connect your PC to the router. 
+	This step enabled internet for the PC.
+	
+	
+	
+EXTRA: 
+roslaunch franka_visualisation franka_visualisation.launch robot_ip:=172.16.02 gripper:=true
+
+(robot_ip is the IP you set for FRANKA in browser Desk app in STEP 0 of this guide)
+(gripper can be set to true/false)
+(dont forget to unlock the robot and move it! RVIZ will show the motions live)
