@@ -227,7 +227,7 @@ HOSTNAME = '172.27.23.65'
 LOGIN = 'Panda'
 PASSWORD = 'panda1234'
 
-franka_open_brakes(HOSTNAME, LOGIN, PASSWORD)
+# franka_open_brakes(HOSTNAME, LOGIN, PASSWORD)
 # franka_gripper_homing(HOSTNAME, LOGIN, PASSWORD)
 # franka_close_brakes(HOSTNAME, LOGIN, PASSWORD)
 

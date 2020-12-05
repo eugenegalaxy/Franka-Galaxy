@@ -1,16 +1,4 @@
-#include <cmath>
-#include <iostream>
-#include <limits> // for quiet_NaN
-#include <string>
-
-#include <opencv2/opencv.hpp>
-#include <franka/exception.h>
-#include <franka/robot.h>
-#include <franka/gripper.h>
-
-#include <franka_plugin/joint_pose_motion_generator.h>
-
-#define ROBOT_IP_STR "172.27.23.65"
+#include <franka_plugin/franka_driver.h>
 
 #define DEBUG(x) do { \
   if (DEBUGGING_ENABLED) { std::cerr << x << std::endl; } \
@@ -29,8 +17,8 @@ bool DEBUGGING_ENABLED = true;
  * Sets a default collision behavior, joint impedance, Cartesian impedance, and filter frequency.
  * @note Selected values are chosen by guessing, feel free to modify them if needed.
  */
-void set_default_behavior() {
-  franka::Robot robot(ROBOT_IP_STR);
+void set_default_behavior(std::string robot_ip) {
+  franka::Robot robot(robot_ip);
   robot.automaticErrorRecovery();
 
   // Set the collision behavior. 
@@ -67,8 +55,8 @@ void set_default_behavior() {
  * @param[in] speed_factor General speed factor in range [0, 1]. Default value is set at 0.5.
  *
  */
-void move_pos_joint(std::array<double, 7> q_goal, double speed_factor=0.5){
-  franka::Robot robot(ROBOT_IP_STR);
+void move_pos_joint(std::string robot_ip, std::array<double, 7> q_goal, double speed_factor){
+  franka::Robot robot(robot_ip);
   robot.automaticErrorRecovery();
   MotionGenerator joint_positions_motion_generator(speed_factor, q_goal);
   robot.control(joint_positions_motion_generator);
@@ -89,8 +77,8 @@ void move_pos_joint(std::array<double, 7> q_goal, double speed_factor=0.5){
  * @param[in] speed_factor General speed factor in range [0, 1]. Default value is set at 0.5.
  *
  */
-void move_pos_home(double speed_factor=0.5){
-  franka::Robot robot(ROBOT_IP_STR);
+void move_pos_home(std::string robot_ip, double speed_factor){
+  franka::Robot robot(robot_ip);
   robot.automaticErrorRecovery();
   //std::array<double, 7> q_goal = {{0, -M_PI_4, 0, -3 * M_PI_4, 0, M_PI_2, M_PI_4}};
   std::array<double, 7> q_goal = {{-0.1956, -0.2230, -0.0413, -2.4106, -0.0088, 2.1743, 0.5597}};  
@@ -115,8 +103,8 @@ void move_pos_home(double speed_factor=0.5){
  * 
  * @param[in] speed_factor General speed factor in range [0, 1]. Default value is set at 0.5.
  */
-void move_pos_transportable(double speed_factor=0.5){
-  franka::Robot robot(ROBOT_IP_STR);
+void move_pos_transportable(std::string robot_ip, double speed_factor){
+  franka::Robot robot(robot_ip);
   robot.automaticErrorRecovery();
   std::array<double, 7> q_goal = {{-0.02104, 0.1628, -0.4269, -3.0051, 1.0922, 1.5307, -0.7904 }};
   MotionGenerator joint_positions_motion_generator(speed_factor, q_goal);
@@ -133,8 +121,8 @@ void move_pos_transportable(double speed_factor=0.5){
  * 
  * @return Full robot state information. Note: this can be easily printed with 'std::cout << robot_state << std::endl;'
  */
-franka::RobotState read_robot_state(){
-  franka::Robot robot(ROBOT_IP_STR);
+franka::RobotState read_robot_state(std::string robot_ip){
+  franka::Robot robot(robot_ip);
   auto robot_state = robot.readOnce();
   DEBUG(robot_state);
   return robot_state;
@@ -185,8 +173,8 @@ cv::Mat _rot_to_euler(const cv::Mat & rotationMatrix){
  * Returns robot end-effector pose in base frame.
  * @return [x, y, z, rx, ry, rz]. x,y,z are in meters; rx,ry,rz in radians (Euler angles). 
  */
-std::array<double, 6> read_ee_pose(){
-  franka::Robot robot(ROBOT_IP_STR);
+std::array<double, 6> read_ee_pose(std::string robot_ip){
+  franka::Robot robot(robot_ip);
   auto robot_state = robot.readOnce().O_T_EE_d;
 
   std::array<double, 9> rotation_vector;
@@ -217,8 +205,8 @@ std::array<double, 6> read_ee_pose(){
   * 
   * @return string of Franka status.
   */
-std::string read_robot_mode(){
-  franka::Robot robot(ROBOT_IP_STR);
+std::string read_robot_mode(std::string robot_ip){
+  franka::Robot robot(robot_ip);
   franka::RobotMode robot_mode = robot.readOnce().robot_mode;
   std::string mode_string;
   switch(robot_mode){
@@ -256,8 +244,8 @@ std::string read_robot_mode(){
 /**
  * A simple controller commanding zero torque for each joint. Gravity is compensated by the robot.
  */ 
-void zero_torque_mode(){
-  franka::Robot robot(ROBOT_IP_STR);
+void zero_torque_mode(std::string robot_ip){
+  franka::Robot robot(robot_ip);
   robot.automaticErrorRecovery();
   robot.control([&](const franka::RobotState&, franka::Duration) -> franka::Torques {
       return {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
@@ -270,8 +258,8 @@ void zero_torque_mode(){
  * 
  * @return status - 'true' is executed successfully, 'false' if not.
  */
-bool gripper_homing(){
-  franka::Gripper gripper(ROBOT_IP_STR);
+bool gripper_homing(std::string robot_ip){
+  franka::Gripper gripper(robot_ip);
   bool status = gripper.homing(); // Gripper Calibration
   if(status == true){
     DEBUG("Gripper homed.");
@@ -290,8 +278,8 @@ bool gripper_homing(){
  * 
  * @return status - 'true' is executed successfully, 'false' if not.
  */
-bool gripper_move(double width, double speed){
-  franka::Gripper gripper(ROBOT_IP_STR);
+bool gripper_move(std::string robot_ip, double width, double speed){
+  franka::Gripper gripper(robot_ip);
   bool status = gripper.move(width, speed); // Gripper Calibration
   if(status == true){
     std::string debug_print = "Gripper moved to " + std::to_string(width) + "m with " + std::to_string(speed) + "m/s.";  
@@ -315,8 +303,8 @@ bool gripper_move(double width, double speed){
  * 
  * @return status - 'true' is executed successfully, 'false' if not.
  */
-bool gripper_grasp(double width, double speed, double force, double epsilon_inner = 0.005, double epsilon_outer = 0.005){
-  franka::Gripper gripper(ROBOT_IP_STR);
+bool gripper_grasp(std::string robot_ip, double width, double speed, double force, double epsilon_inner, double epsilon_outer){
+  franka::Gripper gripper(robot_ip);
   bool status = gripper.grasp(width, speed, force , epsilon_inner, epsilon_outer);
   if(status == true){
     std::string str1 = "Object grasped at " + std::to_string(width) + "m width" +  
@@ -336,8 +324,8 @@ bool gripper_grasp(double width, double speed, double force, double epsilon_inne
  * Stops a currently running gripper move or grasp.
  * @return status - 'true' is executed successfully, 'false' if not.
  */
-bool gripper_stop(){
-  franka::Gripper gripper(ROBOT_IP_STR);
+bool gripper_stop(std::string robot_ip){
+  franka::Gripper gripper(robot_ip);
   bool status = gripper.stop();
   if(status == true){
     DEBUG("Gripper stopped");
@@ -355,99 +343,43 @@ bool gripper_stop(){
  * 
  * @return Gripper state information. Note: this can be easily printed with 'std::cout << gripper_state << std::endl;'
  */
-franka::GripperState read_gripper_state(){
-  franka::Gripper gripper(ROBOT_IP_STR);
+franka::GripperState read_gripper_state(std::string robot_ip){
+  franka::Gripper gripper(robot_ip);
   franka::GripperState gripper_state = gripper.readOnce();
   return gripper_state;
 }
 
-// Needs more work. don't use now.
-void move_cartesian_pose(double target_x, double target_y, double target_z){
-  franka::Robot robot(ROBOT_IP_STR);
-  std::array<double, 16> initial_pose;
-  double time = 0.0;
 
-  robot.control([&time, &initial_pose, &target_x, &target_y, &target_z](const franka::RobotState& robot_state,
-                                        franka::Duration period) -> franka::CartesianPose {
-    time += period.toSec();
+//================================ FRANKX functions ==================================
 
-    if (time == 0.0) {
-      initial_pose = robot_state.O_T_EE_c;
-    }
-
-    std::array<double, 16> current_pose = initial_pose;
-    double cur_x = current_pose[12]; 
-    double cur_y = current_pose[13];
-    double cur_z = current_pose[14]; 
-
-    // computing the motion
-    double vec_x = target_x - cur_x;
-    double vec_y = target_y - cur_y;
-    double vec_z = target_z - cur_z; 
-
-    double l2_norm = sqrt(vec_x*vec_x + vec_y*vec_y + vec_z*vec_z);
-
-    double new_x = 0;
-    double new_y = 0;
-    double new_z = 0;
-
-    new_x = (vec_x / l2_norm);
-    new_y = (vec_y / l2_norm);
-    new_z = (vec_z / l2_norm); 
-
-    // initially, the robot moves to its current position (-> no motion)
-    if (std::isnan(target_x)) {
-      target_x = cur_x; 
-      target_y = cur_y; 
-      target_z = cur_z; 
-    }
-
-    // std::array<double, 16> new_pose = initial_pose;
-    // new_pose[12] += new_x;
-    // new_pose[13] += new_y;
-    // new_pose[14] += new_z;
-
-    constexpr double kRadius = 0.2;
-    double angle = M_PI / 4 * (1 - std::cos(M_PI / 5.0 * time));
-    double delta_x = kRadius * std::sin(angle);
-    double delta_z = kRadius * (std::cos(angle) - 1);
-
-    std::array<double, 16> new_pose = initial_pose;
-    new_pose[12] += delta_x;
-    new_pose[14] += delta_z;
-
-    if (time >= 3.0) {
-      std::cout << std::endl << "Finished motion, shutting down example" << std::endl;
-      return franka::MotionFinished(new_pose);
-    }
-    return new_pose;
-  });
-
+bool move_linear_rel_cartesian(std::string robot_ip, double x, double y, double z){ // in meters
+    frankx::Robot robot(robot_ip);
+    robot.recoverFromErrors();
+    auto motion = frankx::LinearRelativeMotion(frankx::Affine(x, y, z));
+    auto status = robot.move(motion);
+    return status;
 }
 
-int main(int argc, char** argv)
-{
-  try
-  {
+void set_vel_acc_jerk(std::string robot_ip, double ratio){ // from 0 (min) to 1 (max)
+    frankx::Robot robot(robot_ip);
+    robot.recoverFromErrors();
+    robot.setDynamicRel(ratio); // Set velocity,acceleration, and jerk to 'ratio' %.
+}
 
-    // zero_torque_mode();
-    // gripper_homing();
-    // gripper_grasp(0.07, 0.10, 10, 0.02, 0.02);
-    // auto gr_state = read_gripper_state();
-    // std::cout << gr_state << std::endl;
-    set_default_behavior();
-    move_pos_home();
-    move_cartesian_pose(0, 0, 0); 
-    // auto pose1 = read_robot_state();
-    // move_pos_transportable();
-    // auto pose2 = read_robot_state();
-    // std::string status = read_robot_mode();
-    
+void set_velocity(std::string robot_ip, double ratio){
+    frankx::Robot robot(robot_ip);
+    robot.recoverFromErrors();
+    robot.velocity_rel = ratio;
+}
 
-  } catch (const franka::Exception& e)
-    {
-    std::cout << e.what() << std::endl;
-    return -1;
-    }
-  return 0;
+void set_acceleration(std::string robot_ip, double ratio){
+    frankx::Robot robot(robot_ip);
+    robot.recoverFromErrors();
+    robot.acceleration_rel = ratio; 
+}
+
+void set_jerk(std::string robot_ip, double ratio){
+    frankx::Robot robot(robot_ip);
+    robot.recoverFromErrors();
+    robot.jerk_rel = ratio; 
 }
