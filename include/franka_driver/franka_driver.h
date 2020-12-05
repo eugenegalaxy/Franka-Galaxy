@@ -11,7 +11,7 @@
 
 #include <frankx/frankx.hpp>
 
-#include <franka_plugin/joint_pose_motion_generator.h>
+#include <franka_driver/joint_pose_motion_generator.h>
 
 
 

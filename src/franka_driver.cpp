@@ -1,4 +1,4 @@
-#include <franka_plugin/franka_driver.h>
+#include <franka_driver/franka_driver.h>
 
 #define DEBUG(x) do { \
   if (DEBUGGING_ENABLED) { std::cerr << x << std::endl; } \

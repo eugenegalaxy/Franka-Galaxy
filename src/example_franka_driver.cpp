@@ -1,4 +1,4 @@
-#include <franka_plugin/franka_driver.h>
+#include <franka_driver/franka_driver.h>
 #include <string>
 
 int main(int argc, char** argv)

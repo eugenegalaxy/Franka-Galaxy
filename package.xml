@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>franka_plugin</name>
+  <name>franka_driver</name>
   <version>0.0.1</version>
-  <description>The franka_plugin package for AAU Skill Based System framework</description>
+  <description>The franka_driver package for AAU Skill Based System framework</description>
 
   <!-- This email will be active until July 2021.-->
   <maintainer email="jgalak16@student.aau.dk">Jevgenijs Galaktionovs</maintainer>

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(franka_plugin)
+project(franka_driver)
 
 add_compile_options(-std=c++11)
 
@@ -25,7 +25,7 @@ add_subdirectory(frankx)
 
 catkin_package(
 	INCLUDE_DIRS include
-#  LIBRARIES franka_plugin
+#  LIBRARIES franka_driver
   CATKIN_DEPENDS message_runtime
 #  DEPENDS system_lib
 )
@@ -38,12 +38,12 @@ include_directories(
 )
 
 add_library(joint_pos_motion
-  include/franka_plugin/joint_pose_motion_generator.h
+  include/franka_driver/joint_pose_motion_generator.h
   src/joint_pose_motion_generator.cpp
 )
 
 add_library(franka_driver
-  include/franka_plugin/franka_driver.h
+  include/franka_driver/franka_driver.h
   src/franka_driver.cpp 
 )
 
