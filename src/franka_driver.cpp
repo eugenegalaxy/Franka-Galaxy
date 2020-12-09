@@ -237,7 +237,6 @@ std::string read_robot_mode(std::string robot_ip){
       auto full_state = robot.readOnce();
       DEBUG(full_state);
   }
-  DEBUG(mode_string);
   return mode_string;
 }
 

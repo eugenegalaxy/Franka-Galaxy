@@ -5,13 +5,15 @@ from franka_web_API import *
 HOSTNAME = '172.27.23.65'
 LOGIN = 'Panda'
 PASSWORD = 'panda1234'
-
-# franka_open_brakes(HOSTNAME, LOGIN, PASSWORD)
-# franka_gripper_homing(HOSTNAME, LOGIN, PASSWORD)
+input('Type any char to open brakes: ')
+franka_open_brakes(HOSTNAME, LOGIN, PASSWORD)
 # franka_close_brakes(HOSTNAME, LOGIN, PASSWORD)
+input('Type any char to home gripper: ')
+franka_gripper_homing(HOSTNAME, LOGIN, PASSWORD)
 
+input('Type any char to executive "task 1": ')
 task_name = 'test1'
-# franka_execute_task(HOSTNAME, LOGIN, PASSWORD, task_name)
+franka_execute_task(HOSTNAME, LOGIN, PASSWORD, task_name)
 
 pilot_mode1 = 'robot'
 pilot_mode2 = 'one'
