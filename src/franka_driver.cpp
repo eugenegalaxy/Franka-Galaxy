@@ -272,8 +272,8 @@ bool gripper_homing(std::string robot_ip){
 /**
  * Moves the gripper fingers to a specified width.
  *
- * @param[in] width Intended opening width. [m]
- * @param[in] speed Closing speed. [m/s]
+ * @param[in] width Intended opening width. [m] (Max is 0.08)
+ * @param[in] speed Closing speed. [m/s] (Max is ~0.2)
  * 
  * @return status - 'true' is executed successfully, 'false' if not.
  */

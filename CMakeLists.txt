@@ -52,3 +52,6 @@ target_link_libraries(joint_pos_motion ${catkin_LIBRARIES} ${Franka_LIBRARIES} $
 
 add_executable(franka_example src/example_franka_driver.cpp)
 target_link_libraries(franka_example franka_driver)
+
+add_executable(zentropa src/zentropa_franka.cpp)
+target_link_libraries(zentropa franka_driver)
