@@ -1,59 +1,74 @@
 #include <franka_driver/franka_driver.h>
 #include <string>
+// #include <iostream>
+#include <math.h> // for M_PI
 
 char x;
 
-// actionlib::SimpleActionServer<franka_driver::FrankaAction>* myGripperServer;
+double convert_rad_to_deg(double rad_value){
+  double degree = rad_value * 180 / M_PI;
+  // std::cout << std::to_string(rad_value) + " rad is " + std::to_string(degree) + " degrees.\n";
+  return degree;
+}
 
-// void ActionCB(const franka_driver::FrankaGoalConstPtr& goal)
-// {
-//     //action callback
+std::array<double, 7> read_all_joint_pos(std::string robot_ip, bool return_degrees=false){
+  franka::Robot robot(robot_ip);
+  std::array<double, 7> curr_joint_pos_rad = robot.readOnce().q;
+  std::array<double, 7> curr_joint_pos_deg;
 
-//     //interpret goal and switch based on command
+  for(int i=0;i<7;i++){
+    curr_joint_pos_deg[i] = curr_joint_pos_rad[i] * 180 / M_PI;
+  }
 
-//     switch(goal.commandID)
-//     {
-//       case 0:
-//       //home
-//       //call 
-      
-//       franka driver class.function home
-//     }
+  for(int i=0;i<7;i++){ 
+    std::cout << "Joint " + std::to_string(i) + ": " + std::to_string(curr_joint_pos_rad[i]) + " rad";
+    std::cout << " (" + std::to_string(curr_joint_pos_deg[i]) + " degrees) \n";
+    };
+  
+  std::cout << "Array to copy (rad):" << std::endl;
+  std::cout << "{";
+  for(int i=0;i<7;i++){
+    if (i < 6){std::cout << std::to_string(curr_joint_pos_rad[i]) + ", ";}
+    else{std::cout << std::to_string(curr_joint_pos_rad[i]) + "}\n";};
+  }
 
-//     //set actionserver succeeded or failed
-// }
+  std::cout << "Array to copy (degrees):" << std::endl;
+  std::cout << "{";
+  for(int i=0;i<7;i++){
+    if (i < 6){std::cout << std::to_string(curr_joint_pos_deg[i]) + ", ";}
+    else{std::cout << std::to_string(curr_joint_pos_deg[i]) + "}\n";};
+  }
+
+
+  if (return_degrees == false){
+    return curr_joint_pos_rad;
+  }
+  else{
+    return curr_joint_pos_deg;
+  }
+}
+
+
+
 
 int main(int argc, char** argv)
 {
-//   ROS::init();
-
-//   ros::nodehandle n;
-
-//   //instantiate action server object
-
-//   //declare and instantiate ros publisher
-
-//   //spin up thread to always request robot data at fixed frequency
-
-// // OR
-//   ros::rate rate();
-
-//   while(ros::ok())
-//   {
-//     //read robot state
-//     //publish robot state
-
-//     rate.sleep();
-//   }
-
-//   ros::spin(); //endless loop
   try{
+    // bool return_degrees = false;
+    // auto poses = read_all_joint_pos(robot_ip, return_degrees); 
+
+    // zero_torque_mode()
+
+    // for(int i=0;i<7;i++){std::cout << std::to_string(poses[i]) + " ";};
+    // std::cout << "\n";
+
+    // set_vel_acc_jerk(robot_ip, 1);
+
     std::string robot_ip = "172.27.23.65";
-    set_vel_acc_jerk(robot_ip, 1);
+
     while(true){
       gripper_move(robot_ip, 0, 0.2);
       gripper_move(robot_ip, 0.08, 0.2);
-
     }
     // set_vel_acc_jerk(robot_ip, 0.2);
     // std::cout << "Type any char to home gripper: ";
@@ -77,8 +92,6 @@ int main(int argc, char** argv)
     // move_linear_rel_cartesian(robot_ip, 0.1, 0, 0);
     // std::cout << "Type any char to read and print robot state: ";
     // std::cin >> x;
-    // auto pose1 = read_robot_state(robot_ip);
-    // std::cout << pose1 << std::endl;
     // std::cout << "Type any char to move Franka to 'TRANSPORTABLE' position: ";
     // std::cin >> x;
     // move_pos_transportable(robot_ip);

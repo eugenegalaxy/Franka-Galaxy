@@ -1,4 +1,4 @@
-After you have connected Franka Control Interface to your workstation and after you have installed libfranks in ROS,
+After you have connected Franka Control Interface to your workstation and after you have installed libfranka in ROS,
 
 you can run some examples by the following commands:
 

@@ -1,0 +1,61 @@
+{
+"frequency":10,
+"modules" :
+	[{
+		"comment": "Module 1",
+		"ip": "172.27.23.66",
+		"port": "502",
+		"comment": "Inputs to robot from PLC",
+		"inputs": 
+		[
+			{
+			"comment": "Card 1 - Murr Module Inputs",
+			"pin_names":{"1":"Murr1_1", "2":"Murr1_2", "3":"Murr2_1", "4":"Murr2_2", "5":"Murr3_1", "6":"Murr3_2", "7":"Murr4_1", "8":"Murr4_2", "9":"Murr5_1", "10":"Murr5_2"},
+			"read_address": 100,
+			"count": 10,
+			"type": "register"
+			},
+			{
+			"comment": "Card 2 - HMI Buttons Inputs",
+			"pin_names":{"1":"HMI_1", "2":"HMI_2", "3":"HMI_3", "4":"HMI_4", "5":"HMI_5", "6":"HMI_6", "7":"HMI_7", "8":"HMI_8", "9":"HMI_9", "10":"HMI_10", "11":"HMI_11", "12":"HMI_12", "13":"HMI_13", "14":"HMI_14", "15":"HMI_15", "16":"HMI_16"},
+			"read_address": 200,
+			"write_address": 200,
+			"count": 16,
+			"type": "register"
+			},
+			{
+			"comment": "Card 3 - HMI Preset Inputs",
+			"pin_names":{"1":"HMI_Start", "2":"HMI_Task1", "3":"HMI_Task2", "4":"HMI_Task3", "5":"HMI_Task4", "6":"HMI_Task5", "7":"HMI_Move Home"},
+			"read_address": 300,
+			"count": 7,
+			"type": "register"
+			}
+		],
+		"comment": "Outputs from robot to PLC",
+		"outputs": 
+		[
+			{
+			"comment": "Card 1 - Murr Module Outputs",
+			"pin_names":{"1":"Murr6_1", "2":"Murr6_2", "3":"Murr7_1", "4":"Murr7_2", "5":"Murr8_1", "6":"Murr8_2"},
+			"write_address": 110,
+			"count": 6,
+			"type": "register"
+			},
+			{
+			"comment": "Card 2 - HMI Buttons Outputs",
+			"pin_names":{"1":"HMI_1", "2":"HMI_2", "3":"HMI_3", "4":"HMI_4", "5":"HMI_5", "6":"HMI_6", "7":"HMI_7", "8":"HMI_8", "9":"HMI_9", "10":"HMI_10", "11":"HMI_11", "12":"HMI_12", "13":"HMI_13", "14":"HMI_14", "15":"HMI_15", "16":"HMI_16"},
+			"read_address": 210,
+			"write_address": 210,
+			"count": 16,
+			"type": "register"
+			},
+			{
+			"comment": "Card 3 - HMI Preset Outputs",
+			"pin_names":{"1":"Start_Count", "2":"Task1_Count", "3":"Task2_Count", "4":"Task3_Count", "5":"Task4_Count", "6":"Task5_Count", "7":"Home_reset and Stop All"},
+			"write_address": 310,
+			"count": 7,
+			"type": "register"
+			}
+		]
+	}]
+}

@@ -8,7 +8,7 @@ https://github.com/frankaemika/libfranka/issues/62
 
 
 Important note:
-Installation is not automatically applied to the current Kernel. Instead, there is another Kernel that has to be chosen to boot in GRUB boot menu.
+Kernel patching is not applied to the current Ubuntu kernel. Instead, there is another Kernel that has to be chosen to boot in GRUB boot menu.
 Here is how to do it:
 
 
