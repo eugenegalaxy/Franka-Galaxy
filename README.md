@@ -63,6 +63,7 @@ This repository is made in ROS infrastructure. To use this repo, one must clone 
 ### Prerequisites
 - Linux with patched Kernel for Preemtiveness. See `doc/installation_manuals/alternative_real-time_kernel_INSTALLATION_process` for instructions.
 - ROS Melodic (maybe earlier versions too, don't know)
+- libfranka and franka_ros ROS packages
 - cmake at least3.10
 - Following packages are all dependences of submodule 'frankx' and must be installed on your system:
   1. Eigen v3.3.7
